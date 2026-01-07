@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="SupportDesk.ActivityWorker/SupportDesk.ActivityWorker.csproj" />
+  <Project Path="SupportDesk.Api/SupportDesk.Api.csproj" />
+  <Project Path="SupportDesk.AppHost/SupportDesk.AppHost.csproj" />
+  <Project Path="SupportDesk.Contracts/SupportDesk.Contracts.csproj" />
+  <Project Path="SupportDesk.ServiceDefaults/SupportDesk.ServiceDefaults.csproj" />
+</Solution>
