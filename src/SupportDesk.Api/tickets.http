@@ -1,0 +1,151 @@
+﻿@baseUrl = https://localhost:7076
+@ticketId = 33-A\
+@idempotencyKey = 11111111-1111-1111-1111-111111111111
+
+### ------------------------------------------------------------------
+### 0) API health check
+### ------------------------------------------------------------------
+GET {{baseUrl}}/
+
+### ------------------------------------------------------------------
+### 1) Create ticket
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets
+Idempotency-Key: {{idempotencyKey}}
+Content-Type: application/json
+
+{
+  "customerId": "cust-123",
+  "subject": "Cannot log in",
+  "description": "User reports login fails with 500 error",
+  "priority": "High",
+  "tags": ["login", "auth"]
+}
+
+### ------------------------------------------------------------------
+### 2) Get full ticket (write model)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/{{ticketId}}
+
+### ------------------------------------------------------------------
+### 3) Inbox (read model projection)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/inbox
+
+### ------------------------------------------------------------------
+### 4) INVALID workflow transition (Open -> Closed)
+###    Should fail + emit RejectedTransition
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets/{{ticketId}}/status:close
+Content-Type: application/json
+
+{
+  "reason": "Trying to skip steps"
+}
+
+### ------------------------------------------------------------------
+### 5) Start work (Open -> Pending)
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets/{{ticketId}}/status:startwork
+Content-Type: application/json
+
+{
+  "reason": "Agent picked this up"
+}
+
+### ------------------------------------------------------------------
+### 6) Resolve ticket (Pending -> Resolved)
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets/{{ticketId}}/status:resolve
+Content-Type: application/json
+
+{
+  "reason": "Issue fixed"
+}
+
+### ------------------------------------------------------------------
+### 7) INVALID close (Resolved -> Closed) without comment
+###    Guard should fail (needs at least 1 comment)
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets/{{ticketId}}/status:close
+Content-Type: application/json
+
+{
+  "reason": "Customer silent"
+}
+
+### ------------------------------------------------------------------
+### 8) Add comment
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets/{{ticketId}}/comments
+Content-Type: application/json
+
+{
+  "author": "agent.jane",
+  "message": "Customer confirmed the fix works"
+}
+
+### ------------------------------------------------------------------
+### 9) Close ticket (Resolved -> Closed) – guard passes
+### ------------------------------------------------------------------
+POST {{baseUrl}}/tickets/{{ticketId}}/status:close
+Content-Type: application/json
+
+{
+  "reason": "Customer confirmed resolution"
+}
+
+### ------------------------------------------------------------------
+### 10) Update non-workflow fields
+### ------------------------------------------------------------------
+PUT {{baseUrl}}/tickets/{{ticketId}}
+Content-Type: application/json
+
+{
+  "subject": "Login issue resolved",
+  "description": "Final notes added after confirmation",
+  "priority": "Normal",
+  "tags": ["login", "resolved"]
+}
+
+### ------------------------------------------------------------------
+### 11) Inbox filtered by status
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/inbox?status=Closed
+
+### ------------------------------------------------------------------
+### 12) Inbox paging (limit = 1)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/inbox?limit=1
+
+> {%
+  if (response.body.nextCursor) {
+    client.global.set("inboxCursor", response.body.nextCursor);
+  }
+%}
+
+### ------------------------------------------------------------------
+### 13) Inbox paging (next page)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/inbox?limit=1&cursor={{inboxCursor}}
+
+### ------------------------------------------------------------------
+### 14) Timeline (event stream)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/{{ticketId}}/timeline
+
+### ------------------------------------------------------------------
+### 15) Timeline paging (limit = 3)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/{{ticketId}}/timeline?limit=3
+
+> {%
+  if (response.body.nextCursor) {
+    client.global.set("timelineCursor", response.body.nextCursor);
+  }
+%}
+
+### ------------------------------------------------------------------
+### 16) Timeline paging (next page)
+### ------------------------------------------------------------------
+GET {{baseUrl}}/tickets/{{ticketId}}/timeline?limit=3&cursor={{timelineCursor}}

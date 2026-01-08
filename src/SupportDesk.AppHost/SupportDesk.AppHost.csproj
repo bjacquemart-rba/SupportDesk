@@ -1,4 +1,13 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.RavenDB" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SupportDesk.ActivityWorker\SupportDesk.ActivityWorker.csproj" />
+    <ProjectReference Include="..\SupportDesk.Api\SupportDesk.Api.csproj" />
+  </ItemGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>

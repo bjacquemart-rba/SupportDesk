@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Aspire.RavenDB.Client" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SupportDesk.ServiceDefaults\SupportDesk.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\SupportDesk.Contracts\SupportDesk.Contracts.csproj" />
   </ItemGroup>
 </Project>
