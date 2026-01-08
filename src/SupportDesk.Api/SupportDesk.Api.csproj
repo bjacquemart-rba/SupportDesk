@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Aspire.RavenDB.Client" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" />
     <PackageReference Include="Stateless" />
   </ItemGroup>
