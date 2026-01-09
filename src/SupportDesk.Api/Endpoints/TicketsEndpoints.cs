@@ -18,15 +18,15 @@ public static class TicketsEndpoints
         var group = app.MapGroup("/tickets").WithTags("Tickets");
 
         group.MapPost("/", CreateTicket);
-        group.MapGet("/{id}", GetTicket);
-        group.MapPut("/{id}", UpdateTicket);
-        group.MapPost("/{id}/comments", AddComment);
+        group.MapGet("/", GetTicket);
+        group.MapPut("/", UpdateTicket);
+        group.MapPost("/comments", AddComment);
 
         // Workflow: /tickets/{id}/status:resolve
-        group.MapPost("/{id}/status:{trigger}", ApplyWorkflowTrigger);
+        group.MapPost("/status:{trigger}", ApplyWorkflowTrigger);
 
         group.MapGet("/inbox", Inbox);
-        group.MapGet("/{id}/timeline", Timeline);
+        group.MapGet("/timeline", Timeline);
 
         return app;
     }
@@ -230,7 +230,7 @@ public static class TicketsEndpoints
             changed = true;
         }
 
-        var normalizedTags = (req.Tags ?? Array.Empty<string>())
+        var normalizedTags = (req.Tags ?? [])
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();

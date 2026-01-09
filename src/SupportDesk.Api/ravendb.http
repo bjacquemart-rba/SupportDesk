@@ -1,0 +1,44 @@
+@raven = http://localhost:8080
+@db = ravendb
+
+### 1) Get all documents (paged)
+# Uses: GET <server>/databases/<db>/docs?start=&pageSize= :contentReference[oaicite:4]{index=4}
+GET {{raven}}/databases/{{db}}/docs?start=0&pageSize=25
+
+### 2) Get metadata only (faster for inspection)
+# docs?metadataOnly=true :contentReference[oaicite:5]{index=5}
+GET {{raven}}/databases/{{db}}/docs?start=0&pageSize=25&metadataOnly=true
+
+### 3) Get one document by ID (Raven IDs often look like "tickets/33-A")
+# Uses: GET .../docs?id=<documentId> :contentReference[oaicite:6]{index=6}
+@ticketId = tickets/33-A
+GET {{raven}}/databases/{{db}}/docs?id={{ticketId}}
+
+### 4) Get docs by prefix (great for collections if you use prefixes)
+# startsWith=<prefix> :contentReference[oaicite:7]{index=7}
+GET {{raven}}/databases/{{db}}/docs?startsWith=tickets/&pageSize=25
+
+### 5) Query via RQL (SQL-ish)
+# Uses: POST .../queries :contentReference[oaicite:8]{index=8}
+POST {{raven}}/databases/{{db}}/queries
+Content-Type: application/json
+
+{
+  "Query": "from Tickets as t order by t.UpdatedAt desc limit 10"
+}
+
+### 6) Query w/ parameters (recommended habit)
+# POST .../queries :contentReference[oaicite:9]{index=9}
+POST {{raven}}/databases/{{db}}/queries
+Content-Type: application/json
+
+{
+  "Query": "from Tickets where Status = $status order by UpdatedAt desc",
+  "QueryParameters": {
+    "status": "Closed"
+  }
+}
+
+### 7) Delete a document by ID
+# Uses: DELETE .../docs?id=<documentId> :contentReference[oaicite:10]{index=10}
+DELETE {{raven}}/databases/{{db}}/docs?id={{ticketId}}

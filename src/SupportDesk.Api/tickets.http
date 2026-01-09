@@ -1,6 +1,6 @@
 ﻿@baseUrl = https://localhost:7076
-@ticketId = 33-A\
-@idempotencyKey = 11111111-1111-1111-1111-111111111111
+@ticketId = tickets/65-A
+@idempotencyKey = 11111111-1111-1111-1111-111111111112
 
 ### ------------------------------------------------------------------
 ### 0) API health check
@@ -25,7 +25,7 @@ Content-Type: application/json
 ### ------------------------------------------------------------------
 ### 2) Get full ticket (write model)
 ### ------------------------------------------------------------------
-GET {{baseUrl}}/tickets/{{ticketId}}
+GET {{baseUrl}}/tickets?id={{ticketId}}
 
 ### ------------------------------------------------------------------
 ### 3) Inbox (read model projection)
@@ -36,7 +36,7 @@ GET {{baseUrl}}/tickets/inbox
 ### 4) INVALID workflow transition (Open -> Closed)
 ###    Should fail + emit RejectedTransition
 ### ------------------------------------------------------------------
-POST {{baseUrl}}/tickets/{{ticketId}}/status:close
+POST {{baseUrl}}/tickets/status:close?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -46,7 +46,7 @@ Content-Type: application/json
 ### ------------------------------------------------------------------
 ### 5) Start work (Open -> Pending)
 ### ------------------------------------------------------------------
-POST {{baseUrl}}/tickets/{{ticketId}}/status:startwork
+POST {{baseUrl}}/tickets/status:startwork?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -56,7 +56,7 @@ Content-Type: application/json
 ### ------------------------------------------------------------------
 ### 6) Resolve ticket (Pending -> Resolved)
 ### ------------------------------------------------------------------
-POST {{baseUrl}}/tickets/{{ticketId}}/status:resolve
+POST {{baseUrl}}/tickets/status:resolve?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -67,7 +67,7 @@ Content-Type: application/json
 ### 7) INVALID close (Resolved -> Closed) without comment
 ###    Guard should fail (needs at least 1 comment)
 ### ------------------------------------------------------------------
-POST {{baseUrl}}/tickets/{{ticketId}}/status:close
+POST {{baseUrl}}/tickets/status:close?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -77,7 +77,8 @@ Content-Type: application/json
 ### ------------------------------------------------------------------
 ### 8) Add comment
 ### ------------------------------------------------------------------
-POST {{baseUrl}}/tickets/{{ticketId}}/comments
+#POST {{baseUrl}}/tickets/{{ticketId}}/comments
+POST {{baseUrl}}/tickets/comments?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -88,7 +89,7 @@ Content-Type: application/json
 ### ------------------------------------------------------------------
 ### 9) Close ticket (Resolved -> Closed) – guard passes
 ### ------------------------------------------------------------------
-POST {{baseUrl}}/tickets/{{ticketId}}/status:close
+POST {{baseUrl}}/tickets/status:close?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -98,7 +99,7 @@ Content-Type: application/json
 ### ------------------------------------------------------------------
 ### 10) Update non-workflow fields
 ### ------------------------------------------------------------------
-PUT {{baseUrl}}/tickets/{{ticketId}}
+PUT {{baseUrl}}/tickets?id={{ticketId}}
 Content-Type: application/json
 
 {
@@ -127,17 +128,18 @@ GET {{baseUrl}}/tickets/inbox?limit=1
 ### ------------------------------------------------------------------
 ### 13) Inbox paging (next page)
 ### ------------------------------------------------------------------
-GET {{baseUrl}}/tickets/inbox?limit=1&cursor={{inboxCursor}}
+@inboxCursorAgain = "MjAyNi0wMS0wOVQyMjowMjozMS43ODUwNDgyKzAwOjAwfHRpY2tldHMvNjUtQQ=="
+GET {{baseUrl}}/tickets/inbox?limit=1&cursor={{inboxCursorAgain}}
 
 ### ------------------------------------------------------------------
 ### 14) Timeline (event stream)
 ### ------------------------------------------------------------------
-GET {{baseUrl}}/tickets/{{ticketId}}/timeline
+GET {{baseUrl}}/tickets/timeline?id={{ticketId}}
 
 ### ------------------------------------------------------------------
 ### 15) Timeline paging (limit = 3)
 ### ------------------------------------------------------------------
-GET {{baseUrl}}/tickets/{{ticketId}}/timeline?limit=3
+GET {{baseUrl}}/tickets/timeline?id={{ticketId}}&limit=3
 
 > {%
   if (response.body.nextCursor) {
@@ -148,4 +150,5 @@ GET {{baseUrl}}/tickets/{{ticketId}}/timeline?limit=3
 ### ------------------------------------------------------------------
 ### 16) Timeline paging (next page)
 ### ------------------------------------------------------------------
-GET {{baseUrl}}/tickets/{{ticketId}}/timeline?limit=3&cursor={{timelineCursor}}
+@timelineCursorAgain = "MjAyNjAxMDkyMjAwNTQ3MTM5NTUyfHRpY2tldC1hY3Rpdml0eS90aWNrZXRzLzY1LUEvMjAyNjAxMDkyMjAwNTQ3MTM5NTUyLWIwZmQyNzYxZjU1ZjQwMmVhMmQ3NDNjZDQ1OTEyNzk4"
+GET {{baseUrl}}/tickets/timeline?id={{ticketId}}&limit=3&cursor={{timelineCursorAgain}}
