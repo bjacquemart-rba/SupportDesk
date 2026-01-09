@@ -1,6 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var ravenServer = builder.AddRavenDB("ravenServer")
+    .WithImage("ravendb/ravendb")
+    .WithImageTag("latest")
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
